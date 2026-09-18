@@ -4,7 +4,7 @@ A full-stack application for a photography team: photographers upload event
 photos, the studio lead curates the selects, and the client opens a PIN
 protected gallery through a shareable link without creating an account.
 
-Built for the TrizenAI full-stack internship challenge.
+
 
 ---
 
