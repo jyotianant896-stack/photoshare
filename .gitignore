@@ -1,0 +1,21 @@
+# Build output
+target/
+dist/
+node_modules/
+*.jar
+
+# Local data: uploads and the database volume never belong in git
+data/
+uploads/
+
+# Secrets
+.env
+.env.local
+.env.production
+
+# Tooling
+.idea/
+.vscode/
+*.iml
+.DS_Store
+npm-debug.log*

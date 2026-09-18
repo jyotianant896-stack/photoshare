@@ -1,0 +1,52 @@
+# One command to bring the whole thing up:  docker compose up --build
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: photoshare
+      MYSQL_USER: photoshare
+      MYSQL_PASSWORD: ${DB_PASSWORD:-photoshare}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/photoshare?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: photoshare
+      DB_PASSWORD: ${DB_PASSWORD:-photoshare}
+      JWT_SECRET: ${JWT_SECRET:-compose-development-secret-at-least-32-chars}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:5173}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      STORAGE_LOCAL_DIR: /app/data/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/data/uploads
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  db-data:
+  uploads:
